@@ -168,7 +168,7 @@
                             </div>
                         </div>
                         
-                        <div th:if="${competition.gifts and !#strings.isEmpty(competition.gifts)}" class="mb-3">
+                        <div th:if="${competition.gifts != null and !#strings.isEmpty(competition.gifts)}" class="mb-3">
                             <div class="d-flex align-items-start">
                                 <i class="fas fa-gift text-warning me-2 mt-1"></i>
                                 <span class="text-muted small" th:text="${#strings.abbreviate(competition.gifts, 80)}">사은품 정보...</span>

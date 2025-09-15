@@ -159,7 +159,7 @@
                         </div>
                     </div>
 
-                    <div th:if="${competition.gifts and !#strings.isEmpty(competition.gifts)}" class="info-item">
+                    <div th:if="${competition.gifts != null and !#strings.isEmpty(competition.gifts)}" class="info-item">
                         <div class="d-flex align-items-start">
                             <div class="info-icon bg-warning me-3">
                                 <i class="fas fa-gift"></i>

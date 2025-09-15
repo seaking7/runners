@@ -6,11 +6,14 @@ import com.run.runners.entity.Comment;
 import com.run.runners.service.CompetitionService;
 import com.run.runners.service.PostService;
 import com.run.runners.service.CommentService;
+import com.run.runners.service.LikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.Optional;
 
@@ -21,6 +24,7 @@ public class WebController {
     private final CompetitionService competitionService;
     private final PostService postService;
     private final CommentService commentService;
+    private final LikeService likeService;
 
     @GetMapping("/")
     public String home() {
@@ -101,13 +105,16 @@ public class WebController {
     }
 
     @GetMapping("/community/board/{id}")
-    public String postDetail(@PathVariable Long id, Model model) {
+    public String postDetail(@PathVariable Long id, Model model, HttpServletRequest request) {
         Optional<Post> post = postService.getPostByIdAndIncrementView(id);
         if (post.isPresent()) {
             Post currentPost = post.get();
+            String userIdentifier = request.getRemoteAddr(); // Use IP address as user identifier
+            
             model.addAttribute("post", currentPost);
             model.addAttribute("comments", commentService.getCommentsByPostId(id));
             model.addAttribute("newComment", new Comment());
+            model.addAttribute("isLiked", likeService.isLikedByUser(id, userIdentifier));
             return "community/detail";
         } else {
             return "redirect:/community/board";
@@ -165,5 +172,39 @@ public class WebController {
             redirectAttributes.addFlashAttribute("errorMessage", "댓글 삭제 중 오류가 발생했습니다.");
         }
         return "redirect:/community/board/" + postId;
+    }
+
+    // 좋아요 관련 매핑
+    @PostMapping("/community/board/{postId}/like")
+    @ResponseBody
+    public ResponseEntity<?> toggleLike(@PathVariable Long postId, HttpServletRequest request) {
+        try {
+            String userIdentifier = request.getRemoteAddr();
+            boolean isLiked = likeService.toggleLike(postId, userIdentifier);
+            long likeCount = likeService.getLikeCount(postId);
+            
+            return ResponseEntity.ok().body(new LikeResponse(isLiked, likeCount));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("좋아요 처리 중 오류가 발생했습니다.");
+        }
+    }
+    
+    // 좋아요 응답 클래스
+    public static class LikeResponse {
+        private boolean liked;
+        private long likeCount;
+        
+        public LikeResponse(boolean liked, long likeCount) {
+            this.liked = liked;
+            this.likeCount = likeCount;
+        }
+        
+        public boolean isLiked() {
+            return liked;
+        }
+        
+        public long getLikeCount() {
+            return likeCount;
+        }
     }
 }

@@ -33,6 +33,9 @@ public class Post {
     private Integer viewCount = 0;
     
     @Column(nullable = false)
+    private Integer likeCount = 0;
+    
+    @Column(nullable = false)
     private LocalDateTime createdAt;
     
     @Column(nullable = false)

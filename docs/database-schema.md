@@ -81,6 +81,7 @@ INSERT INTO r_competitions (name, event_date_time, location, course, gifts, part
 | content | TEXT | NOT NULL | 게시글 내용 |
 | author | VARCHAR(255) | NOT NULL | 작성자 |
 | view_count | INT | NOT NULL, DEFAULT 0 | 조회수 |
+| like_count | INT | NOT NULL, DEFAULT 0 | 좋아요 수 |
 | created_at | DATETIME | NOT NULL | 작성일시 |
 | updated_at | DATETIME | NOT NULL | 수정일시 |
 
@@ -93,6 +94,7 @@ CREATE TABLE r_posts (
     content TEXT NOT NULL COMMENT '게시글 내용',
     author VARCHAR(255) NOT NULL COMMENT '작성자',
     view_count INT NOT NULL DEFAULT 0 COMMENT '조회수',
+    like_count INT NOT NULL DEFAULT 0 COMMENT '좋아요 수',
     created_at DATETIME NOT NULL COMMENT '작성일시',
     updated_at DATETIME NOT NULL COMMENT '수정일시',
     PRIMARY KEY (id)
@@ -176,15 +178,65 @@ INSERT INTO r_comments (content, author, post_id, created_at, updated_at) VALUES
 ('나이키 에어줌 페가수스 추천드려요. 쿠셔닝이 좋아요.', '신발전문가', 3, NOW(), NOW());
 ```
 
+### 4. r_likes (좋아요)
+
+게시글에 대한 좋아요 정보를 저장하는 테이블입니다.
+
+#### 테이블 구조
+
+| 컬럼명 | 데이터 타입 | 제약조건 | 설명 |
+|--------|------------|----------|------|
+| id | BIGINT | PRIMARY KEY, AUTO_INCREMENT | 좋아요 고유 ID |
+| post_id | BIGINT | NOT NULL, FOREIGN KEY | 게시글 ID (참조) |
+| user_identifier | VARCHAR(255) | NOT NULL | 사용자 식별자 (IP 주소) |
+| created_at | DATETIME | NOT NULL | 좋아요 생성일시 |
+
+#### MySQL 테이블 생성문
+
+```sql
+CREATE TABLE r_likes (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    post_id BIGINT NOT NULL COMMENT '게시글 ID',
+    user_identifier VARCHAR(255) NOT NULL COMMENT '사용자 식별자 (IP 주소)',
+    created_at DATETIME NOT NULL COMMENT '좋아요 생성일시',
+    PRIMARY KEY (id),
+    FOREIGN KEY (post_id) REFERENCES r_posts(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_like_per_user (post_id, user_identifier)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='좋아요';
+```
+
+#### 인덱스
+
+```sql
+-- 게시글별 좋아요 조회용 인덱스
+CREATE INDEX idx_likes_post_id ON r_likes(post_id);
+
+-- 사용자별 좋아요 조회용 인덱스
+CREATE INDEX idx_likes_user_identifier ON r_likes(user_identifier);
+
+-- 좋아요 생성일시 정렬용 인덱스
+CREATE INDEX idx_likes_created_at ON r_likes(created_at);
+```
+
+#### 샘플 데이터
+
+```sql
+INSERT INTO r_likes (post_id, user_identifier, created_at) VALUES
+(1, '192.168.1.100', NOW()),
+(1, '192.168.1.101', NOW()),
+(2, '192.168.1.100', NOW()),
+(3, '192.168.1.102', NOW());
+```
+
 ## 향후 확장 예정 테이블
 
-### 4. users (사용자)
+### 5. users (사용자)
 - 사용자 정보 관리
 
-### 5. running_records (달리기 기록)
+### 6. running_records (달리기 기록)
 - 개인 달리기 기록 저장
 
-### 6. competition_participants (대회 참가자)
+### 7. competition_participants (대회 참가자)
 - 대회 참가 신청 정보
 
 ## 변경 이력
@@ -195,6 +247,7 @@ INSERT INTO r_comments (content, author, post_id, created_at, updated_at) VALUES
 | 2024-09-15 | 1.1 | posts 테이블 추가 (커뮤니티 게시판) | Claude |
 | 2024-09-15 | 1.2 | comments 테이블 추가 (댓글 기능) | Claude |
 | 2024-09-15 | 1.3 | H2에서 MySQL로 데이터베이스 전환 | Claude |
+| 2024-09-15 | 1.4 | r_likes 테이블 추가 및 r_posts에 like_count 필드 추가 (좋아요 기능) | Claude |
 
 ## 주의사항
 

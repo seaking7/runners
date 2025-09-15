@@ -154,17 +154,74 @@
                     </div>
                 </div>
 
-                <!-- Comments Section (준비중) -->
+                <!-- Comments Section -->
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-light">
                         <h5 class="mb-0">
-                            <i class="fas fa-comments me-2"></i>댓글 (준비중)
+                            <i class="fas fa-comments me-2"></i>댓글 
+                            <span class="badge bg-primary ms-2" th:text="${#lists.size(comments)}">0</span>
                         </h5>
                     </div>
-                    <div class="card-body text-center py-5">
-                        <i class="fas fa-comment-dots fa-3x text-muted mb-3"></i>
-                        <h6 class="text-muted mb-3">댓글 기능 준비 중</h6>
-                        <p class="text-muted mb-0">곧 댓글을 통해 더욱 활발한 소통을 할 수 있습니다!</p>
+                    <div class="card-body">
+                        <!-- Comment Form -->
+                        <form th:action="@{/community/board/{postId}/comments(postId=${post.id})}" 
+                              th:object="${newComment}" method="post" class="mb-4">
+                            <div class="mb-3">
+                                <label for="commentAuthor" class="form-label">
+                                    <i class="fas fa-user me-1"></i>작성자
+                                </label>
+                                <input type="text" class="form-control" id="commentAuthor" 
+                                       th:field="*{author}" placeholder="닉네임을 입력하세요" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="commentContent" class="form-label">
+                                    <i class="fas fa-comment me-1"></i>댓글 내용
+                                </label>
+                                <textarea class="form-control" id="commentContent" 
+                                          th:field="*{content}" rows="3" 
+                                          placeholder="댓글을 입력하세요" required></textarea>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>댓글 등록
+                                </button>
+                            </div>
+                        </form>
+
+                        <hr>
+
+                        <!-- Comments List -->
+                        <div th:if="${#lists.isEmpty(comments)}" class="text-center py-4">
+                            <i class="fas fa-comment-slash fa-2x text-muted mb-3"></i>
+                            <p class="text-muted mb-0">첫 번째 댓글을 작성해보세요!</p>
+                        </div>
+
+                        <div th:if="${!#lists.isEmpty(comments)}">
+                            <div th:each="comment : ${comments}" class="comment-item mb-3 p-3 border rounded">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user-circle fa-lg text-primary me-2"></i>
+                                        <strong th:text="${comment.author}">댓글 작성자</strong>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <small class="text-muted me-2" 
+                                               th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">
+                                            2024-01-01 10:00
+                                        </small>
+                                        <form th:action="@{/community/board/{postId}/comments/{commentId}/delete(postId=${post.id}, commentId=${comment.id})}" 
+                                              method="post" style="display: inline;">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                    onclick="return confirm('정말 삭제하시겠습니까?')">
+                                                <i class="fas fa-trash fa-xs"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="comment-content" th:text="${comment.content}" style="white-space: pre-line;">
+                                    댓글 내용이 여기에 표시됩니다.
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

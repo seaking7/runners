@@ -144,19 +144,84 @@ INSERT INTO posts (title, content, author, view_count, created_at, updated_at) V
 ('러닝화 추천 부탁드려요', '러닝을 시작한지 1개월 된 초보입니다.&#10;발에 맞는 러닝화를 찾고 있는데 추천 부탁드려요.&#10;예산은 10만원 정도입니다.', '신발고민', 8, NOW(), NOW());
 ```
 
+### 3. comments (댓글)
+
+게시글에 달린 댓글을 저장하는 테이블입니다.
+
+#### 테이블 구조
+
+| 컬럼명 | 데이터 타입 | 제약조건 | 설명 |
+|--------|------------|----------|------|
+| id | BIGINT | PRIMARY KEY, AUTO_INCREMENT | 댓글 고유 ID |
+| content | TEXT | NOT NULL | 댓글 내용 |
+| author | VARCHAR(255) | NOT NULL | 댓글 작성자 |
+| post_id | BIGINT | NOT NULL, FOREIGN KEY | 게시글 ID (참조) |
+| created_at | DATETIME | NOT NULL | 작성일시 |
+| updated_at | DATETIME | NOT NULL | 수정일시 |
+
+#### MySQL 테이블 생성문
+
+```sql
+CREATE TABLE comments (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    content TEXT NOT NULL COMMENT '댓글 내용',
+    author VARCHAR(255) NOT NULL COMMENT '댓글 작성자',
+    post_id BIGINT NOT NULL COMMENT '게시글 ID',
+    created_at DATETIME NOT NULL COMMENT '작성일시',
+    updated_at DATETIME NOT NULL COMMENT '수정일시',
+    PRIMARY KEY (id),
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='댓글';
+```
+
+#### H2 테이블 생성문 (개발용)
+
+```sql
+CREATE TABLE comments (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    content CLOB NOT NULL,
+    author VARCHAR(255) NOT NULL,
+    post_id BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
+);
+```
+
+#### 인덱스
+
+```sql
+-- 게시글별 댓글 조회용 인덱스
+CREATE INDEX idx_comments_post_id ON comments(post_id);
+
+-- 댓글 작성일시 정렬용 인덱스
+CREATE INDEX idx_comments_created_at ON comments(created_at);
+
+-- 작성자별 댓글 검색용 인덱스
+CREATE INDEX idx_comments_author ON comments(author);
+```
+
+#### 샘플 데이터
+
+```sql
+INSERT INTO comments (content, author, post_id, created_at, updated_at) VALUES
+('축하해요! 저도 첫 5km 완주했을 때가 기억나네요. 정말 뿌듯하죠!', '응원러너', 1, NOW(), NOW()),
+('다음엔 10km 도전해보세요. 화이팅!', '마라토너', 1, NOW(), NOW()),
+('여의도 코스 정말 좋아요! 저도 자주 뛰는 곳이에요.', '한강사랑', 2, NOW(), NOW()),
+('나이키 에어줌 페가수스 추천드려요. 쿠셔닝이 좋아요.', '신발전문가', 3, NOW(), NOW());
+```
+
 ## 향후 확장 예정 테이블
 
-### 3. users (사용자)
+### 4. users (사용자)
 - 사용자 정보 관리
 
-### 4. running_records (달리기 기록)
+### 5. running_records (달리기 기록)
 - 개인 달리기 기록 저장
 
-### 5. competition_participants (대회 참가자)
+### 6. competition_participants (대회 참가자)
 - 대회 참가 신청 정보
-
-### 6. comments (댓글)
-- 게시글 댓글 저장
 
 ## 변경 이력
 
@@ -164,6 +229,7 @@ INSERT INTO posts (title, content, author, view_count, created_at, updated_at) V
 |------|------|-----------|--------|
 | 2024-09-15 | 1.0 | 초기 competitions 테이블 생성 | Claude |
 | 2024-09-15 | 1.1 | posts 테이블 추가 (커뮤니티 게시판) | Claude |
+| 2024-09-15 | 1.2 | comments 테이블 추가 (댓글 기능) | Claude |
 
 ## 주의사항
 

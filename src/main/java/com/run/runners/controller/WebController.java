@@ -2,8 +2,10 @@ package com.run.runners.controller;
 
 import com.run.runners.entity.Competition;
 import com.run.runners.entity.Post;
+import com.run.runners.entity.Comment;
 import com.run.runners.service.CompetitionService;
 import com.run.runners.service.PostService;
+import com.run.runners.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +20,7 @@ public class WebController {
     
     private final CompetitionService competitionService;
     private final PostService postService;
+    private final CommentService commentService;
 
     @GetMapping("/")
     public String home() {
@@ -101,7 +104,10 @@ public class WebController {
     public String postDetail(@PathVariable Long id, Model model) {
         Optional<Post> post = postService.getPostByIdAndIncrementView(id);
         if (post.isPresent()) {
-            model.addAttribute("post", post.get());
+            Post currentPost = post.get();
+            model.addAttribute("post", currentPost);
+            model.addAttribute("comments", commentService.getCommentsByPostId(id));
+            model.addAttribute("newComment", new Comment());
             return "community/detail";
         } else {
             return "redirect:/community/board";
@@ -126,5 +132,38 @@ public class WebController {
             model.addAttribute("posts", postService.getAllPosts());
         }
         return "community/board";
+    }
+
+    // 댓글 관련 매핑
+    @PostMapping("/community/board/{postId}/comments")
+    public String addComment(@PathVariable Long postId, 
+                           @ModelAttribute Comment comment,
+                           RedirectAttributes redirectAttributes) {
+        try {
+            Optional<Post> post = postService.getPostById(postId);
+            if (post.isPresent()) {
+                comment.setPost(post.get());
+                commentService.saveComment(comment);
+                redirectAttributes.addFlashAttribute("successMessage", "댓글이 성공적으로 등록되었습니다.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "게시글을 찾을 수 없습니다.");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "댓글 등록 중 오류가 발생했습니다.");
+        }
+        return "redirect:/community/board/" + postId;
+    }
+
+    @PostMapping("/community/board/{postId}/comments/{commentId}/delete")
+    public String deleteComment(@PathVariable Long postId, 
+                              @PathVariable Long commentId,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            commentService.deleteComment(commentId);
+            redirectAttributes.addFlashAttribute("successMessage", "댓글이 삭제되었습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "댓글 삭제 중 오류가 발생했습니다.");
+        }
+        return "redirect:/community/board/" + postId;
     }
 }

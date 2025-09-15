@@ -6,22 +6,21 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "posts")
+@Table(name = "comments")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Post {
+public class Comment {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(nullable = false)
-    private String title;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
     
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
@@ -30,16 +29,10 @@ public class Post {
     private String author;
     
     @Column(nullable = false)
-    private Integer viewCount = 0;
-    
-    @Column(nullable = false)
     private LocalDateTime createdAt;
     
     @Column(nullable = false)
     private LocalDateTime updatedAt;
-    
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments = new ArrayList<>();
     
     @PrePersist
     protected void onCreate() {
@@ -50,9 +43,5 @@ public class Post {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
-    }
-    
-    public int getCommentCount() {
-        return comments != null ? comments.size() : 0;
     }
 }

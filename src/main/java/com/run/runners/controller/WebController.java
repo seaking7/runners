@@ -1,7 +1,9 @@
 package com.run.runners.controller;
 
 import com.run.runners.entity.Competition;
+import com.run.runners.entity.Post;
 import com.run.runners.service.CompetitionService;
+import com.run.runners.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +17,7 @@ import java.util.Optional;
 public class WebController {
     
     private final CompetitionService competitionService;
+    private final PostService postService;
 
     @GetMapping("/")
     public String home() {
@@ -68,5 +71,60 @@ public class WebController {
     @GetMapping("/help")
     public String help() {
         return "help";
+    }
+
+    // 커뮤니티 자유게시판 관련 매핑
+    @GetMapping("/community/board")
+    public String communityBoard(Model model) {
+        model.addAttribute("posts", postService.getAllPosts());
+        return "community/board";
+    }
+
+    @GetMapping("/community/board/write")
+    public String postWriteForm(Model model) {
+        model.addAttribute("post", new Post());
+        return "community/write";
+    }
+
+    @PostMapping("/community/board/write")
+    public String postWrite(@ModelAttribute Post post, RedirectAttributes redirectAttributes) {
+        try {
+            postService.savePost(post);
+            redirectAttributes.addFlashAttribute("successMessage", "게시글이 성공적으로 등록되었습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "게시글 등록 중 오류가 발생했습니다.");
+        }
+        return "redirect:/community/board";
+    }
+
+    @GetMapping("/community/board/{id}")
+    public String postDetail(@PathVariable Long id, Model model) {
+        Optional<Post> post = postService.getPostByIdAndIncrementView(id);
+        if (post.isPresent()) {
+            model.addAttribute("post", post.get());
+            return "community/detail";
+        } else {
+            return "redirect:/community/board";
+        }
+    }
+
+    @GetMapping("/community/board/search")
+    public String postSearch(@RequestParam(required = false) String keyword, 
+                           @RequestParam(required = false) String type,
+                           Model model) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            if ("title".equals(type)) {
+                model.addAttribute("posts", postService.searchByTitle(keyword));
+            } else if ("author".equals(type)) {
+                model.addAttribute("posts", postService.searchByAuthor(keyword));
+            } else {
+                model.addAttribute("posts", postService.searchByTitleOrContent(keyword));
+            }
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("type", type);
+        } else {
+            model.addAttribute("posts", postService.getAllPosts());
+        }
+        return "community/board";
     }
 }

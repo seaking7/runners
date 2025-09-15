@@ -76,25 +76,94 @@ INSERT INTO competitions (name, event_date_time, location, course, gifts, partic
 ('제주 올레길 트레일런', '2024-07-10 09:00:00', '제주특별자치도 서귀포시 올레 7코스', '외돌개 출발 → 월평포구 → 서귀포 자연휴양림 도착\n총 거리: 15km\n중급자 이상 추천', '완주메달, 제주 특산품 세트, 기능성 양말', 45000, NOW());
 ```
 
+### 2. posts (커뮤니티 게시글)
+
+커뮤니티 자유게시판의 게시글을 저장하는 테이블입니다.
+
+#### 테이블 구조
+
+| 컬럼명 | 데이터 타입 | 제약조건 | 설명 |
+|--------|------------|----------|------|
+| id | BIGINT | PRIMARY KEY, AUTO_INCREMENT | 게시글 고유 ID |
+| title | VARCHAR(255) | NOT NULL | 게시글 제목 |
+| content | TEXT | NOT NULL | 게시글 내용 |
+| author | VARCHAR(255) | NOT NULL | 작성자 |
+| view_count | INT | NOT NULL, DEFAULT 0 | 조회수 |
+| created_at | DATETIME | NOT NULL | 작성일시 |
+| updated_at | DATETIME | NOT NULL | 수정일시 |
+
+#### MySQL 테이블 생성문
+
+```sql
+CREATE TABLE posts (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL COMMENT '게시글 제목',
+    content TEXT NOT NULL COMMENT '게시글 내용',
+    author VARCHAR(255) NOT NULL COMMENT '작성자',
+    view_count INT NOT NULL DEFAULT 0 COMMENT '조회수',
+    created_at DATETIME NOT NULL COMMENT '작성일시',
+    updated_at DATETIME NOT NULL COMMENT '수정일시',
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='커뮤니티 게시글';
+```
+
+#### H2 테이블 생성문 (개발용)
+
+```sql
+CREATE TABLE posts (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    content CLOB NOT NULL,
+    author VARCHAR(255) NOT NULL,
+    view_count INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    PRIMARY KEY (id)
+);
+```
+
+#### 인덱스
+
+```sql
+-- 작성일시 정렬용 인덱스
+CREATE INDEX idx_posts_created_at ON posts(created_at);
+
+-- 제목 검색용 인덱스
+CREATE INDEX idx_posts_title ON posts(title);
+
+-- 작성자 검색용 인덱스
+CREATE INDEX idx_posts_author ON posts(author);
+```
+
+#### 샘플 데이터
+
+```sql
+INSERT INTO posts (title, content, author, view_count, created_at, updated_at) VALUES
+('첫 5km 완주 후기!', '어제 처음으로 5km를 쉬지 않고 뛰었습니다!&#10;정말 힘들었지만 완주했을 때의 성취감은 정말 대단했어요.&#10;다음 목표는 10km입니다!', '러닝초보', 15, NOW(), NOW()),
+('한강 러닝코스 추천', '한강공원 여의도 구간이 정말 좋아요.&#10;평평하고 야경도 아름답습니다.&#10;초보자분들께 추천드려요!', '한강러너', 23, NOW(), NOW()),
+('러닝화 추천 부탁드려요', '러닝을 시작한지 1개월 된 초보입니다.&#10;발에 맞는 러닝화를 찾고 있는데 추천 부탁드려요.&#10;예산은 10만원 정도입니다.', '신발고민', 8, NOW(), NOW());
+```
+
 ## 향후 확장 예정 테이블
 
-### 2. users (사용자)
+### 3. users (사용자)
 - 사용자 정보 관리
 
-### 3. running_records (달리기 기록)
+### 4. running_records (달리기 기록)
 - 개인 달리기 기록 저장
-
-### 4. community_posts (커뮤니티 게시글)
-- 커뮤니티 게시글 저장
 
 ### 5. competition_participants (대회 참가자)
 - 대회 참가 신청 정보
+
+### 6. comments (댓글)
+- 게시글 댓글 저장
 
 ## 변경 이력
 
 | 날짜 | 버전 | 변경 내용 | 작성자 |
 |------|------|-----------|--------|
 | 2024-09-15 | 1.0 | 초기 competitions 테이블 생성 | Claude |
+| 2024-09-15 | 1.1 | posts 테이블 추가 (커뮤니티 게시판) | Claude |
 
 ## 주의사항
 

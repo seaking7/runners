@@ -1,0 +1,19 @@
+server:
+  port: 9281
+
+spring.application:
+  name: runners
+
+
+spring.datasource:
+  driver-class-name: com.mysql.cj.jdbc.Driver
+  url: jdbc:mysql://localhost:3306/test1?serverTimezone=Asia/Seoul
+  username: ${DB_USERNAME}
+  password: ${DB_PASSWORD}
+  hikari:
+    maximum-pool-size: 30
+    connection-timeout: 5000
+    minimum-idle: 10
+    idle-timeout: 60000
+    max-lifetime: 180000
+    validation-timeout: 2000

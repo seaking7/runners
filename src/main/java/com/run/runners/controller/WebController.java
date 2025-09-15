@@ -4,11 +4,13 @@ import com.run.runners.entity.Competition;
 import com.run.runners.entity.Post;
 import com.run.runners.entity.Comment;
 import com.run.runners.entity.Tips;
+import com.run.runners.entity.Review;
 import com.run.runners.service.CompetitionService;
 import com.run.runners.service.PostService;
 import com.run.runners.service.CommentService;
 import com.run.runners.service.LikeService;
 import com.run.runners.service.TipsService;
+import com.run.runners.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,6 +30,7 @@ public class WebController {
     private final CommentService commentService;
     private final LikeService likeService;
     private final TipsService tipsService;
+    private final ReviewService reviewService;
 
     @GetMapping("/")
     public String home() {
@@ -264,5 +267,60 @@ public class WebController {
             model.addAttribute("tips", tipsService.getAllTips());
         }
         return "community/tips";
+    }
+    
+    // 달리기 후기 게시판 관련 매핑
+    @GetMapping("/community/reviews")
+    public String reviewsBoard(Model model) {
+        model.addAttribute("reviews", reviewService.getAllReviews());
+        return "community/reviews";
+    }
+
+    @GetMapping("/community/reviews/write")
+    public String reviewWriteForm(Model model) {
+        model.addAttribute("review", new Review());
+        return "community/reviews-write";
+    }
+
+    @PostMapping("/community/reviews/write")
+    public String reviewWrite(@ModelAttribute Review review, RedirectAttributes redirectAttributes) {
+        try {
+            reviewService.saveReview(review);
+            redirectAttributes.addFlashAttribute("successMessage", "달리기 후기가 성공적으로 등록되었습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "달리기 후기 등록 중 오류가 발생했습니다.");
+        }
+        return "redirect:/community/reviews";
+    }
+
+    @GetMapping("/community/reviews/{id}")
+    public String reviewDetail(@PathVariable Long id, Model model) {
+        Optional<Review> review = reviewService.getReviewByIdAndIncrementView(id);
+        if (review.isPresent()) {
+            model.addAttribute("review", review.get());
+            return "community/reviews-detail";
+        } else {
+            return "redirect:/community/reviews";
+        }
+    }
+
+    @GetMapping("/community/reviews/search")
+    public String reviewSearch(@RequestParam(required = false) String keyword, 
+                             @RequestParam(required = false) String type,
+                             Model model) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            if ("title".equals(type)) {
+                model.addAttribute("reviews", reviewService.searchByTitle(keyword));
+            } else if ("author".equals(type)) {
+                model.addAttribute("reviews", reviewService.searchByAuthor(keyword));
+            } else {
+                model.addAttribute("reviews", reviewService.searchByTitleOrContent(keyword));
+            }
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("type", type);
+        } else {
+            model.addAttribute("reviews", reviewService.getAllReviews());
+        }
+        return "community/reviews";
     }
 }

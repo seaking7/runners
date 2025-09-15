@@ -1,7 +1,7 @@
 # 데이터베이스 스키마
 
 ## 개요
-러너스 커뮤니티 애플리케이션의 데이터베이스 테이블 구조 및 생성문을 정의합니다.
+러너스 커뮤니티 애플리케이션의 MySQL 데이터베이스 테이블 구조 및 생성문을 정의합니다.
 
 ## 테이블 목록
 
@@ -38,20 +38,12 @@ CREATE TABLE competitions (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='대회정보';
 ```
 
-#### H2 테이블 생성문 (개발용)
+#### 테이블 생성 스크립트
 
 ```sql
-CREATE TABLE competitions (
-    id BIGINT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
-    event_date_time TIMESTAMP NOT NULL,
-    location VARCHAR(255) NOT NULL,
-    course CLOB NOT NULL,
-    gifts CLOB,
-    participation_fee INT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    PRIMARY KEY (id)
-);
+-- 데이터베이스 생성
+CREATE DATABASE IF NOT EXISTS test1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE test1;
 ```
 
 #### 인덱스
@@ -107,20 +99,6 @@ CREATE TABLE posts (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='커뮤니티 게시글';
 ```
 
-#### H2 테이블 생성문 (개발용)
-
-```sql
-CREATE TABLE posts (
-    id BIGINT NOT NULL AUTO_INCREMENT,
-    title VARCHAR(255) NOT NULL,
-    content CLOB NOT NULL,
-    author VARCHAR(255) NOT NULL,
-    view_count INT NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
-    PRIMARY KEY (id)
-);
-```
 
 #### 인덱스
 
@@ -174,20 +152,6 @@ CREATE TABLE comments (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='댓글';
 ```
 
-#### H2 테이블 생성문 (개발용)
-
-```sql
-CREATE TABLE comments (
-    id BIGINT NOT NULL AUTO_INCREMENT,
-    content CLOB NOT NULL,
-    author VARCHAR(255) NOT NULL,
-    post_id BIGINT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
-);
-```
 
 #### 인덱스
 
@@ -230,11 +194,14 @@ INSERT INTO comments (content, author, post_id, created_at, updated_at) VALUES
 | 2024-09-15 | 1.0 | 초기 competitions 테이블 생성 | Claude |
 | 2024-09-15 | 1.1 | posts 테이블 추가 (커뮤니티 게시판) | Claude |
 | 2024-09-15 | 1.2 | comments 테이블 추가 (댓글 기능) | Claude |
+| 2024-09-15 | 1.3 | H2에서 MySQL로 데이터베이스 전환 | Claude |
 
 ## 주의사항
 
-1. **문자 인코딩**: 한글 데이터 저장을 위해 utf8mb4 charset 사용 (MySQL)
-2. **DateTime 처리**: 애플리케이션에서 LocalDateTime으로 처리
-3. **텍스트 필드**: course, gifts 필드는 긴 텍스트 저장을 위해 TEXT/CLOB 타입 사용
-4. **참가비용**: 정수형으로 저장 (원 단위)
-5. **자동 생성 필드**: created_at은 JPA @PrePersist로 자동 설정
+1. **데이터베이스**: MySQL 8.0 이상 사용 권장
+2. **문자 인코딩**: 한글 데이터 저장을 위해 utf8mb4 charset 사용
+3. **DateTime 처리**: 애플리케이션에서 LocalDateTime으로 처리, 타임존은 Asia/Seoul 설정
+4. **텍스트 필드**: course, gifts, content 필드는 긴 텍스트 저장을 위해 TEXT 타입 사용
+5. **참가비용**: 정수형으로 저장 (원 단위)
+6. **자동 생성 필드**: created_at, updated_at은 JPA @PrePersist, @PreUpdate로 자동 설정
+7. **환경변수**: DB_USERNAME, DB_PASSWORD 환경변수 설정 필요

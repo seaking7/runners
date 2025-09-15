@@ -19,11 +19,27 @@ This is a Spring Boot application named "runners" built with Java 17 and Gradle.
 - `./gradlew check` - Run all checks including tests
 
 ### Database Configuration
-The application expects these environment variables for database connection:
-- `DB_USERNAME` - MySQL database username
-- `DB_PASSWORD` - MySQL database password
+The application supports multiple database configurations using Spring profiles:
 
-The application connects to MySQL at `localhost:3306/test1` and runs on port 9281.
+#### Development Environment (default)
+- Profile: `dev` (active by default)
+- Database: H2 in-memory database
+- No environment variables required
+- H2 Console available at: http://localhost:9281/h2-console
+
+#### Production Environment
+- Profile: `prod`
+- Database: MySQL
+- Required environment variables:
+  - `DB_USERNAME` - MySQL database username
+  - `DB_PASSWORD` - MySQL database password
+- MySQL connection: `localhost:3306/test1`
+
+#### Running with specific profiles:
+- Development: `./gradlew bootRun` (default)
+- Production: `DB_USERNAME=root DB_PASSWORD=password ./gradlew bootRun --args='--spring.profiles.active=prod'`
+
+The application runs on port 9281.
 
 ## Project Structure
 

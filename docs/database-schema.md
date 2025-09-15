@@ -228,15 +228,121 @@ INSERT INTO r_likes (post_id, user_identifier, created_at) VALUES
 (3, '192.168.1.102', NOW());
 ```
 
+### 5. r_tips (팁&노하우)
+
+팁&노하우 게시판의 팁 정보를 저장하는 테이블입니다.
+
+#### 테이블 구조
+
+| 컬럼명 | 데이터 타입 | 제약조건 | 설명 |
+|--------|------------|----------|------|
+| id | BIGINT | PRIMARY KEY, AUTO_INCREMENT | 팁 고유 ID |
+| title | VARCHAR(255) | NOT NULL | 팁 제목 |
+| content | TEXT | NOT NULL | 팁 내용 |
+| author | VARCHAR(255) | NOT NULL | 작성자 |
+| view_count | INT | NOT NULL, DEFAULT 0 | 조회수 |
+| like_count | INT | NOT NULL, DEFAULT 0 | 좋아요 수 |
+| created_at | DATETIME | NOT NULL | 작성일시 |
+| updated_at | DATETIME | NOT NULL | 수정일시 |
+
+#### MySQL 테이블 생성문
+
+```sql
+CREATE TABLE r_tips (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL COMMENT '팁 제목',
+    content TEXT NOT NULL COMMENT '팁 내용',
+    author VARCHAR(255) NOT NULL COMMENT '작성자',
+    view_count INT NOT NULL DEFAULT 0 COMMENT '조회수',
+    like_count INT NOT NULL DEFAULT 0 COMMENT '좋아요 수',
+    created_at DATETIME NOT NULL COMMENT '작성일시',
+    updated_at DATETIME NOT NULL COMMENT '수정일시',
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='팁&노하우';
+```
+
+#### 인덱스
+
+```sql
+-- 작성일시 정렬용 인덱스
+CREATE INDEX idx_tips_created_at ON r_tips(created_at);
+
+-- 제목 검색용 인덱스
+CREATE INDEX idx_tips_title ON r_tips(title);
+
+-- 작성자 검색용 인덱스
+CREATE INDEX idx_tips_author ON r_tips(author);
+
+-- 조회수 정렬용 인덱스
+CREATE INDEX idx_tips_view_count ON r_tips(view_count);
+
+-- 좋아요 수 정렬용 인덱스
+CREATE INDEX idx_tips_like_count ON r_tips(like_count);
+```
+
+#### 샘플 데이터
+
+```sql
+INSERT INTO r_tips (title, content, author, view_count, like_count, created_at, updated_at) VALUES
+('초보자를 위한 러닝 시작 가이드', '러닝을 처음 시작하는 분들을 위한 단계별 가이드입니다.
+
+1. 목표 설정하기
+- 처음에는 거창한 목표보다는 작고 달성 가능한 목표를 세우세요
+- 예: 일주일에 3번, 20분씩 걷기부터 시작
+
+2. 적절한 장비 준비하기  
+- 러닝화: 발에 맞는 편안한 운동화 선택
+- 의류: 통기성 좋은 운동복 착용
+
+3. 워밍업과 쿨다운
+- 운동 전후 5-10분간 스트레칭 필수
+- 부상 예방을 위해 절대 생략하지 마세요', '러닝코치김', 245, 18, NOW(), NOW()),
+
+('효과적인 러닝화 선택 팁', '올바른 러닝화 선택으로 부상을 예방하고 러닝 효율을 높이세요!
+
+🏃‍♂️ 발 타입 파악하기
+1. 평발 vs 높은 아치 vs 정상 아치
+2. 발의 폭 (넓은 발 vs 좁은 발)
+
+👟 러닝화 선택 기준
+1. 쿠셔닝: 체중과 러닝 스타일에 맞게
+2. 사이즈: 평소보다 0.5-1cm 큰 사이즈
+3. 브랜드별 특성 이해하기
+
+💡 구매 팁
+- 오후에 발이 부은 상태에서 구매
+- 실제 러닝할 때 신는 양말 착용 후 피팅
+- 전문 러닝샵에서 발 분석 후 구매 추천', '신발전문가', 189, 23, NOW(), NOW()),
+
+('마라톤 완주를 위한 12주 훈련 계획', '마라톤 완주를 목표로 하는 러너들을 위한 체계적인 훈련 계획입니다.
+
+📅 1-4주차: 기초 체력 다지기
+- 주 3-4회, 30-40분 LSD(Long Slow Distance)
+- 1주일에 1회 인터벌 트레이닝
+
+📅 5-8주차: 지구력 향상
+- 주 4-5회 훈련
+- 장거리 러닝 거리 점진적 증가 (주말 20-25km)
+
+📅 9-12주차: 대회 준비
+- 테이퍼링(tapering) 시작
+- 실전 페이스 연습
+
+⚠️ 주의사항
+- 무리하지 말고 몸의 신호를 듣기
+- 충분한 휴식과 영양 섭취
+- 부상 징후 발견 시 즉시 휴식', '마라톤러너', 156, 31, NOW(), NOW());
+```
+
 ## 향후 확장 예정 테이블
 
-### 5. users (사용자)
+### 6. users (사용자)
 - 사용자 정보 관리
 
-### 6. running_records (달리기 기록)
+### 7. running_records (달리기 기록)
 - 개인 달리기 기록 저장
 
-### 7. competition_participants (대회 참가자)
+### 8. competition_participants (대회 참가자)
 - 대회 참가 신청 정보
 
 ## 변경 이력
@@ -248,6 +354,7 @@ INSERT INTO r_likes (post_id, user_identifier, created_at) VALUES
 | 2024-09-15 | 1.2 | comments 테이블 추가 (댓글 기능) | Claude |
 | 2024-09-15 | 1.3 | H2에서 MySQL로 데이터베이스 전환 | Claude |
 | 2024-09-15 | 1.4 | r_likes 테이블 추가 및 r_posts에 like_count 필드 추가 (좋아요 기능) | Claude |
+| 2024-09-15 | 1.5 | r_tips 테이블 추가 (팁&노하우 게시판) | Claude |
 
 ## 주의사항
 

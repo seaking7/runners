@@ -3,10 +3,12 @@ package com.run.runners.controller;
 import com.run.runners.entity.Competition;
 import com.run.runners.entity.Post;
 import com.run.runners.entity.Comment;
+import com.run.runners.entity.Tips;
 import com.run.runners.service.CompetitionService;
 import com.run.runners.service.PostService;
 import com.run.runners.service.CommentService;
 import com.run.runners.service.LikeService;
+import com.run.runners.service.TipsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,6 +27,7 @@ public class WebController {
     private final PostService postService;
     private final CommentService commentService;
     private final LikeService likeService;
+    private final TipsService tipsService;
 
     @GetMapping("/")
     public String home() {
@@ -206,5 +209,60 @@ public class WebController {
         public long getLikeCount() {
             return likeCount;
         }
+    }
+    
+    // 팁&노하우 게시판 관련 매핑
+    @GetMapping("/community/tips")
+    public String tipsBoard(Model model) {
+        model.addAttribute("tips", tipsService.getAllTips());
+        return "community/tips";
+    }
+
+    @GetMapping("/community/tips/write")
+    public String tipsWriteForm(Model model) {
+        model.addAttribute("tips", new Tips());
+        return "community/tips-write";
+    }
+
+    @PostMapping("/community/tips/write")
+    public String tipsWrite(@ModelAttribute Tips tips, RedirectAttributes redirectAttributes) {
+        try {
+            tipsService.saveTips(tips);
+            redirectAttributes.addFlashAttribute("successMessage", "팁이 성공적으로 등록되었습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "팁 등록 중 오류가 발생했습니다.");
+        }
+        return "redirect:/community/tips";
+    }
+
+    @GetMapping("/community/tips/{id}")
+    public String tipsDetail(@PathVariable Long id, Model model) {
+        Optional<Tips> tips = tipsService.getTipsByIdAndIncrementView(id);
+        if (tips.isPresent()) {
+            model.addAttribute("tips", tips.get());
+            return "community/tips-detail";
+        } else {
+            return "redirect:/community/tips";
+        }
+    }
+
+    @GetMapping("/community/tips/search")
+    public String tipsSearch(@RequestParam(required = false) String keyword, 
+                           @RequestParam(required = false) String type,
+                           Model model) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            if ("title".equals(type)) {
+                model.addAttribute("tips", tipsService.searchByTitle(keyword));
+            } else if ("author".equals(type)) {
+                model.addAttribute("tips", tipsService.searchByAuthor(keyword));
+            } else {
+                model.addAttribute("tips", tipsService.searchByTitleOrContent(keyword));
+            }
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("type", type);
+        } else {
+            model.addAttribute("tips", tipsService.getAllTips());
+        }
+        return "community/tips";
     }
 }

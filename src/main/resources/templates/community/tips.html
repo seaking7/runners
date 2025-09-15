@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>팁&노하우 - 러너스 커뮤니티</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+            color: #dc3545 !important;
+        }
+        .nav-link {
+            font-weight: 500;
+        }
+        .nav-link:hover {
+            color: #dc3545 !important;
+        }
+        .nav-link.active {
+            color: #dc3545 !important;
+            font-weight: bold;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #20c997 0%, #0dcaf0 100%);
+            color: white;
+            padding: 3rem 0;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        .tips-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .tips-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .tips-meta {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .view-count {
+            background-color: #e9ecef;
+            border-radius: 15px;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.8rem;
+        }
+        footer {
+            background-color: #f8f9fa;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-running me-2"></i>러너스 커뮤니티
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/competitions">
+                            <i class="fas fa-trophy me-1"></i>대회정보
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/my-running">
+                            <i class="fas fa-chart-line me-1"></i>나의달리기
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/community">
+                            <i class="fas fa-users me-1"></i>커뮤니티
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/help">
+                            <i class="fas fa-question-circle me-1"></i>도움말
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container" style="margin-top: 2rem;">
+        <!-- Page Header -->
+        <div class="page-header text-center">
+            <div class="container">
+                <h1 class="display-5 mb-3">
+                    <i class="fas fa-lightbulb me-3"></i>팁 & 노하우
+                </h1>
+                <p class="lead">러닝 기술, 훈련법, 장비 추천 등 유용한 정보를 공유해보세요!</p>
+            </div>
+        </div>
+
+        <!-- Search and Write Bar -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <form action="/community/tips/search" method="get" class="d-flex">
+                    <select name="type" class="form-select me-2" style="max-width: 120px;">
+                        <option value="all" th:selected="${type == 'all' or type == null}">전체</option>
+                        <option value="title" th:selected="${type == 'title'}">제목</option>
+                        <option value="author" th:selected="${type == 'author'}">작성자</option>
+                    </select>
+                    <input type="text" name="keyword" class="form-control me-2" placeholder="검색어를 입력하세요" th:value="${keyword}">
+                    <button type="submit" class="btn btn-outline-info">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="/community/tips/write" class="btn btn-info">
+                    <i class="fas fa-pencil-alt me-2"></i>팁 작성하기
+                </a>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Tips List -->
+        <div th:if="${#lists.isEmpty(tips)}" class="text-center py-5">
+            <i class="fas fa-lightbulb fa-5x text-muted mb-4"></i>
+            <h4 class="text-muted mb-3">등록된 팁이 없습니다</h4>
+            <p class="text-muted mb-4">첫 번째 팁을 공유해보세요!</p>
+            <a href="/community/tips/write" class="btn btn-info btn-lg">
+                <i class="fas fa-pencil-alt me-2"></i>팁 작성하기
+            </a>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(tips)}">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2 text-info"></i>팁 & 노하우 목록
+                    <span class="badge bg-info ms-2" th:text="${#lists.size(tips)}">0</span>
+                </h5>
+            </div>
+
+            <div class="row g-3">
+                <div th:each="tip : ${tips}" class="col-12">
+                    <div class="card tips-card" 
+                         th:onclick="'window.location.href=\'/community/tips/' + ${tip.id} + '\''">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="card-title mb-2">
+                                        <i class="fas fa-lightbulb text-info me-2"></i>
+                                        <span th:text="${tip.title}">팁 제목</span>
+                                    </h6>
+                                    <p class="card-text text-muted small mb-2" 
+                                       th:text="${#strings.abbreviate(tip.content, 100)}">팁 내용 미리보기...</p>
+                                    <div class="tips-meta d-flex align-items-center">
+                                        <i class="fas fa-user me-1"></i>
+                                        <span th:text="${tip.author}" class="me-3">작성자</span>
+                                        <i class="fas fa-calendar me-1"></i>
+                                        <span th:text="${#temporals.format(tip.createdAt, 'yyyy-MM-dd HH:mm')}" class="me-3">2024-01-01 10:00</span>
+                                        <span class="view-count">
+                                            <i class="fas fa-eye me-1"></i>
+                                            <span th:text="${tip.viewCount}">0</span>
+                                        </span>
+                                        <span class="view-count ms-2">
+                                            <i class="fas fa-thumbs-up me-1"></i>
+                                            <span th:text="${tip.likeCount}">0</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to Community -->
+        <div class="text-center mt-5">
+            <a href="/community" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>커뮤니티 메인으로
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2024 러너스 커뮤니티. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="mb-0">함께 달리며 성장하는 커뮤니티</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

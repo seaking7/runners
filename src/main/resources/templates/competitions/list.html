@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대회정보 - 러너스 커뮤니티</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+            color: #dc3545 !important;
+        }
+        .nav-link {
+            font-weight: 500;
+        }
+        .nav-link:hover {
+            color: #dc3545 !important;
+        }
+        .nav-link.active {
+            color: #dc3545 !important;
+            font-weight: bold;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 3rem 0;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        .competition-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            border-radius: 15px;
+        }
+        .competition-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .competition-date {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 0.5rem 1rem;
+            font-weight: bold;
+        }
+        .competition-fee {
+            background-color: #28a745;
+            color: white;
+            border-radius: 20px;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        footer {
+            background-color: #f8f9fa;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-running me-2"></i>러너스 커뮤니티
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/competitions">
+                            <i class="fas fa-trophy me-1"></i>대회정보
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/my-running">
+                            <i class="fas fa-chart-line me-1"></i>나의달리기
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/community">
+                            <i class="fas fa-users me-1"></i>커뮤니티
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/help">
+                            <i class="fas fa-question-circle me-1"></i>도움말
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container" style="margin-top: 2rem;">
+        <!-- Page Header -->
+        <div class="page-header text-center">
+            <div class="container">
+                <h1 class="display-5 mb-3">
+                    <i class="fas fa-trophy me-3"></i>대회정보
+                </h1>
+                <p class="lead">다양한 러닝 대회 정보를 확인하고 참가해보세요!</p>
+            </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="mb-0">
+                <i class="fas fa-list me-2 text-primary"></i>등록된 대회 목록
+                <span class="badge bg-primary ms-2" th:text="${#lists.size(competitions)}">0</span>
+            </h3>
+            <a href="/competitions/register" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus me-2"></i>대회 등록
+            </a>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Competition List -->
+        <div th:if="${#lists.isEmpty(competitions)}" class="text-center py-5">
+            <i class="fas fa-calendar-times fa-5x text-muted mb-4"></i>
+            <h4 class="text-muted mb-3">등록된 대회가 없습니다</h4>
+            <p class="text-muted mb-4">첫 번째 대회를 등록해보세요!</p>
+            <a href="/competitions/register" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus me-2"></i>대회 등록하기
+            </a>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(competitions)}" class="row g-4">
+            <div th:each="competition : ${competitions}" class="col-lg-6">
+                <div class="card competition-card shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title mb-0" th:text="${competition.name}">대회명</h5>
+                            <span class="competition-fee" th:text="${#numbers.formatInteger(competition.participationFee, 0, 'COMMA')} + '원'">0원</span>
+                        </div>
+                        
+                        <div class="competition-date mb-3" th:text="${#temporals.format(competition.eventDateTime, 'yyyy년 MM월 dd일 HH:mm')}">
+                            2024년 12월 25일 09:00
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                <span class="text-muted" th:text="${competition.location}">대회장소</span>
+                            </div>
+                            
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-route text-info me-2 mt-1"></i>
+                                <span class="text-muted" th:text="${#strings.abbreviate(competition.course, 100)}">코스 설명...</span>
+                            </div>
+                        </div>
+                        
+                        <div th:if="${competition.gifts and !#strings.isEmpty(competition.gifts)}" class="mb-3">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-gift text-warning me-2 mt-1"></i>
+                                <span class="text-muted small" th:text="${#strings.abbreviate(competition.gifts, 80)}">사은품 정보...</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                등록일: <span th:text="${#temporals.format(competition.createdAt, 'yyyy-MM-dd')}">2024-01-01</span>
+                            </small>
+                            <a th:href="@{/competitions/{id}(id=${competition.id})}" class="btn btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i>상세보기
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2024 러너스 커뮤니티. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="mb-0">함께 달리며 성장하는 커뮤니티</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

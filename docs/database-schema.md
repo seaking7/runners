@@ -5,7 +5,7 @@
 
 ## 테이블 목록
 
-### 1. competitions (대회정보)
+### 1. r_competitions (대회정보)
 
 대회 정보를 저장하는 테이블입니다.
 
@@ -25,7 +25,7 @@
 #### MySQL 테이블 생성문
 
 ```sql
-CREATE TABLE competitions (
+CREATE TABLE r_competitions (
     id BIGINT NOT NULL AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL COMMENT '대회명',
     event_date_time DATETIME NOT NULL COMMENT '대회 일시',
@@ -50,25 +50,25 @@ USE test1;
 
 ```sql
 -- 대회 일시 검색용 인덱스
-CREATE INDEX idx_competitions_event_date_time ON competitions(event_date_time);
+CREATE INDEX idx_competitions_event_date_time ON r_competitions(event_date_time);
 
 -- 대회 장소 검색용 인덱스
-CREATE INDEX idx_competitions_location ON competitions(location);
+CREATE INDEX idx_competitions_location ON r_competitions(location);
 
 -- 등록일시 정렬용 인덱스
-CREATE INDEX idx_competitions_created_at ON competitions(created_at);
+CREATE INDEX idx_competitions_created_at ON r_competitions(created_at);
 ```
 
 #### 샘플 데이터
 
 ```sql
-INSERT INTO competitions (name, event_date_time, location, course, gifts, participation_fee, created_at) VALUES
+INSERT INTO r_competitions (name, event_date_time, location, course, gifts, participation_fee, created_at) VALUES
 ('서울 한강 마라톤 대회', '2024-05-15 08:00:00', '서울특별시 영등포구 한강공원 여의도지구', '여의도 한강공원 출발 → 반포대교 → 잠수교 → 여의도 한강공원 도착\n총 거리: 10km\n평탄한 코스로 초보자도 참가 가능', '완주메달, 기념 티셔츠, 스포츠 타월', 30000, NOW()),
 ('부산 해운대 달리기 축제', '2024-06-20 07:30:00', '부산광역시 해운대구 해운대해수욕장', '해운대해수욕장 출발 → 동백섬 → 달맞이고개 → 해운대해수욕장 도착\n총 거리: 5km\n바다 전망이 아름다운 코스', '완주메달, 해운대 기념품, 생수', 25000, NOW()),
 ('제주 올레길 트레일런', '2024-07-10 09:00:00', '제주특별자치도 서귀포시 올레 7코스', '외돌개 출발 → 월평포구 → 서귀포 자연휴양림 도착\n총 거리: 15km\n중급자 이상 추천', '완주메달, 제주 특산품 세트, 기능성 양말', 45000, NOW());
 ```
 
-### 2. posts (커뮤니티 게시글)
+### 2. r_posts (커뮤니티 게시글)
 
 커뮤니티 자유게시판의 게시글을 저장하는 테이블입니다.
 
@@ -87,7 +87,7 @@ INSERT INTO competitions (name, event_date_time, location, course, gifts, partic
 #### MySQL 테이블 생성문
 
 ```sql
-CREATE TABLE posts (
+CREATE TABLE r_posts (
     id BIGINT NOT NULL AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL COMMENT '게시글 제목',
     content TEXT NOT NULL COMMENT '게시글 내용',
@@ -104,25 +104,25 @@ CREATE TABLE posts (
 
 ```sql
 -- 작성일시 정렬용 인덱스
-CREATE INDEX idx_posts_created_at ON posts(created_at);
+CREATE INDEX idx_posts_created_at ON r_posts(created_at);
 
 -- 제목 검색용 인덱스
-CREATE INDEX idx_posts_title ON posts(title);
+CREATE INDEX idx_posts_title ON r_posts(title);
 
 -- 작성자 검색용 인덱스
-CREATE INDEX idx_posts_author ON posts(author);
+CREATE INDEX idx_posts_author ON r_posts(author);
 ```
 
 #### 샘플 데이터
 
 ```sql
-INSERT INTO posts (title, content, author, view_count, created_at, updated_at) VALUES
+INSERT INTO r_posts (title, content, author, view_count, created_at, updated_at) VALUES
 ('첫 5km 완주 후기!', '어제 처음으로 5km를 쉬지 않고 뛰었습니다!&#10;정말 힘들었지만 완주했을 때의 성취감은 정말 대단했어요.&#10;다음 목표는 10km입니다!', '러닝초보', 15, NOW(), NOW()),
 ('한강 러닝코스 추천', '한강공원 여의도 구간이 정말 좋아요.&#10;평평하고 야경도 아름답습니다.&#10;초보자분들께 추천드려요!', '한강러너', 23, NOW(), NOW()),
 ('러닝화 추천 부탁드려요', '러닝을 시작한지 1개월 된 초보입니다.&#10;발에 맞는 러닝화를 찾고 있는데 추천 부탁드려요.&#10;예산은 10만원 정도입니다.', '신발고민', 8, NOW(), NOW());
 ```
 
-### 3. comments (댓글)
+### 3. r_comments (댓글)
 
 게시글에 달린 댓글을 저장하는 테이블입니다.
 
@@ -140,7 +140,7 @@ INSERT INTO posts (title, content, author, view_count, created_at, updated_at) V
 #### MySQL 테이블 생성문
 
 ```sql
-CREATE TABLE comments (
+CREATE TABLE r_comments (
     id BIGINT NOT NULL AUTO_INCREMENT,
     content TEXT NOT NULL COMMENT '댓글 내용',
     author VARCHAR(255) NOT NULL COMMENT '댓글 작성자',
@@ -148,7 +148,7 @@ CREATE TABLE comments (
     created_at DATETIME NOT NULL COMMENT '작성일시',
     updated_at DATETIME NOT NULL COMMENT '수정일시',
     PRIMARY KEY (id),
-    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
+    FOREIGN KEY (post_id) REFERENCES r_posts(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='댓글';
 ```
 
@@ -157,19 +157,19 @@ CREATE TABLE comments (
 
 ```sql
 -- 게시글별 댓글 조회용 인덱스
-CREATE INDEX idx_comments_post_id ON comments(post_id);
+CREATE INDEX idx_comments_post_id ON r_comments(post_id);
 
 -- 댓글 작성일시 정렬용 인덱스
-CREATE INDEX idx_comments_created_at ON comments(created_at);
+CREATE INDEX idx_comments_created_at ON r_comments(created_at);
 
 -- 작성자별 댓글 검색용 인덱스
-CREATE INDEX idx_comments_author ON comments(author);
+CREATE INDEX idx_comments_author ON r_comments(author);
 ```
 
 #### 샘플 데이터
 
 ```sql
-INSERT INTO comments (content, author, post_id, created_at, updated_at) VALUES
+INSERT INTO r_comments (content, author, post_id, created_at, updated_at) VALUES
 ('축하해요! 저도 첫 5km 완주했을 때가 기억나네요. 정말 뿌듯하죠!', '응원러너', 1, NOW(), NOW()),
 ('다음엔 10km 도전해보세요. 화이팅!', '마라토너', 1, NOW(), NOW()),
 ('여의도 코스 정말 좋아요! 저도 자주 뛰는 곳이에요.', '한강사랑', 2, NOW(), NOW()),

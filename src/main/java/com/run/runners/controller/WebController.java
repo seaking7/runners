@@ -7,6 +7,8 @@ import com.run.runners.entity.Tips;
 import com.run.runners.entity.Review;
 import com.run.runners.entity.RunningRecord;
 import com.run.runners.entity.RunningStatistics;
+import com.run.runners.entity.RunningMate;
+import com.run.runners.entity.RunningMateComment;
 import com.run.runners.service.CompetitionService;
 import com.run.runners.service.PostService;
 import com.run.runners.service.CommentService;
@@ -15,6 +17,8 @@ import com.run.runners.service.TipsService;
 import com.run.runners.service.ReviewService;
 import com.run.runners.service.RunningRecordService;
 import com.run.runners.service.RunningStatisticsService;
+import com.run.runners.service.RunningMateService;
+import com.run.runners.service.RunningMateCommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -38,6 +42,8 @@ public class WebController {
     private final ReviewService reviewService;
     private final RunningRecordService runningRecordService;
     private final RunningStatisticsService runningStatisticsService;
+    private final RunningMateService runningMateService;
+    private final RunningMateCommentService runningMateCommentService;
 
     @GetMapping("/")
     public String home() {
@@ -425,5 +431,99 @@ public class WebController {
             model.addAttribute("reviews", reviewService.getAllReviews());
         }
         return "community/reviews";
+    }
+    
+    // 러닝메이트 게시판 관련 매핑
+    @GetMapping("/community/running-mates")
+    public String runningMatesBoard(Model model) {
+        model.addAttribute("runningMates", runningMateService.getAllRunningMates());
+        return "community/running-mates";
+    }
+
+    @GetMapping("/community/running-mates/write")
+    public String runningMateWriteForm(Model model) {
+        model.addAttribute("runningMate", new RunningMate());
+        return "community/running-mates-write";
+    }
+
+    @PostMapping("/community/running-mates/write")
+    public String runningMateWrite(@ModelAttribute RunningMate runningMate, RedirectAttributes redirectAttributes) {
+        try {
+            runningMateService.saveRunningMate(runningMate);
+            redirectAttributes.addFlashAttribute("successMessage", "러닝메이트 모집글이 성공적으로 등록되었습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "러닝메이트 모집글 등록 중 오류가 발생했습니다.");
+        }
+        return "redirect:/community/running-mates";
+    }
+
+    @GetMapping("/community/running-mates/{id}")
+    public String runningMateDetail(@PathVariable Long id, Model model) {
+        Optional<RunningMate> runningMate = runningMateService.getRunningMateByIdAndIncrementView(id);
+        if (runningMate.isPresent()) {
+            RunningMate currentRunningMate = runningMate.get();
+            
+            model.addAttribute("runningMate", currentRunningMate);
+            model.addAttribute("comments", runningMateCommentService.getCommentsByRunningMateId(id));
+            model.addAttribute("newComment", new RunningMateComment());
+            return "community/running-mates-detail";
+        } else {
+            return "redirect:/community/running-mates";
+        }
+    }
+
+    @GetMapping("/community/running-mates/search")
+    public String runningMateSearch(@RequestParam(required = false) String keyword, 
+                                   @RequestParam(required = false) String type,
+                                   Model model) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            if ("title".equals(type)) {
+                model.addAttribute("runningMates", runningMateService.searchByTitle(keyword));
+            } else if ("author".equals(type)) {
+                model.addAttribute("runningMates", runningMateService.searchByAuthor(keyword));
+            } else if ("location".equals(type)) {
+                model.addAttribute("runningMates", runningMateService.searchByLocation(keyword));
+            } else {
+                model.addAttribute("runningMates", runningMateService.searchByTitleOrContent(keyword));
+            }
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("type", type);
+        } else {
+            model.addAttribute("runningMates", runningMateService.getAllRunningMates());
+        }
+        return "community/running-mates";
+    }
+
+    // 러닝메이트 댓글 관련 매핑
+    @PostMapping("/community/running-mates/{runningMateId}/comments")
+    public String addRunningMateComment(@PathVariable Long runningMateId, 
+                                       @ModelAttribute RunningMateComment comment,
+                                       RedirectAttributes redirectAttributes) {
+        try {
+            Optional<RunningMate> runningMate = runningMateService.getRunningMateById(runningMateId);
+            if (runningMate.isPresent()) {
+                comment.setRunningMate(runningMate.get());
+                runningMateCommentService.saveComment(comment);
+                redirectAttributes.addFlashAttribute("successMessage", "참여 신청이 성공적으로 등록되었습니다.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "러닝메이트 모집글을 찾을 수 없습니다.");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "참여 신청 중 오류가 발생했습니다.");
+        }
+        return "redirect:/community/running-mates/" + runningMateId;
+    }
+
+    @PostMapping("/community/running-mates/{runningMateId}/comments/{commentId}/delete")
+    public String deleteRunningMateComment(@PathVariable Long runningMateId, 
+                                          @PathVariable Long commentId,
+                                          RedirectAttributes redirectAttributes) {
+        try {
+            runningMateCommentService.deleteComment(commentId);
+            redirectAttributes.addFlashAttribute("successMessage", "참여 신청이 취소되었습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "참여 신청 취소 중 오류가 발생했습니다.");
+        }
+        return "redirect:/community/running-mates/" + runningMateId;
     }
 }

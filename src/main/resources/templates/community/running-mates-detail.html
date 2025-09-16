@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${runningMate.title} + ' - 러닝메이트'">러닝메이트 - 러너스 커뮤니티</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+            color: #dc3545 !important;
+        }
+        .nav-link {
+            font-weight: 500;
+        }
+        .nav-link:hover {
+            color: #dc3545 !important;
+        }
+        .nav-link.active {
+            color: #dc3545 !important;
+            font-weight: bold;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 2rem 0;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        .badge-full {
+            background-color: #dc3545 !important;
+        }
+        .badge-available {
+            background-color: #28a745 !important;
+        }
+        .content-section {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        footer {
+            background-color: #f8f9fa;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-running me-2"></i>러너스 커뮤니티
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/competitions">
+                            <i class="fas fa-trophy me-1"></i>대회정보
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/my-running">
+                            <i class="fas fa-chart-line me-1"></i>나의달리기
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/community">
+                            <i class="fas fa-users me-1"></i>커뮤니티
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/help">
+                            <i class="fas fa-question-circle me-1"></i>도움말
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container" style="margin-top: 2rem;">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h1 class="h3 mb-2" th:text="${runningMate.title}"></h1>
+                        <div class="d-flex align-items-center">
+                            <span th:if="${runningMate.fullyBooked}" class="badge badge-full me-2">모집완료</span>
+                            <span th:unless="${runningMate.fullyBooked}" class="badge badge-available me-2">모집중</span>
+                            <small>
+                                <i class="fas fa-user me-1"></i><span th:text="${runningMate.author}"></span>
+                                <i class="fas fa-calendar-alt ms-3 me-1"></i><span th:text="${#temporals.format(runningMate.createdAt, 'yyyy.MM.dd HH:mm')}"></span>
+                                <i class="fas fa-eye ms-3 me-1"></i><span th:text="${runningMate.viewCount}"></span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Running Info -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>러닝 정보
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <i class="fas fa-map-marker-alt fa-2x text-success mb-2"></i>
+                                    <h6>장소</h6>
+                                    <p class="text-muted mb-0" th:text="${runningMate.location}"></p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <i class="fas fa-clock fa-2x text-success mb-2"></i>
+                                    <h6>러닝 일시</h6>
+                                    <p class="text-muted mb-0" th:text="${#temporals.format(runningMate.runningDateTime, 'yyyy.MM.dd HH:mm')}"></p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <i class="fas fa-users fa-2x text-success mb-2"></i>
+                                    <h6>참가 인원</h6>
+                                    <p class="text-muted mb-0">
+                                        <span th:text="${runningMate.currentParticipants}"></span> / <span th:text="${runningMate.maxParticipants}"></span>명
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <i class="fas fa-percentage fa-2x text-success mb-2"></i>
+                                    <h6>모집률</h6>
+                                    <p class="text-muted mb-0" th:text="${#numbers.formatPercent(runningMate.currentParticipants / runningMate.maxParticipants, 0, 0)}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-file-alt me-2"></i>상세 내용
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="content-section">
+                            <p th:text="${runningMate.content}" style="white-space: pre-line;"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comments Section -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-comments me-2"></i>참여 신청 
+                            <span class="badge bg-secondary" th:text="${runningMate.commentCount}"></span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Comment Form -->
+                        <div th:unless="${runningMate.fullyBooked}" class="mb-4">
+                            <form th:action="@{/community/running-mates/{id}/comments(id=${runningMate.id})}" 
+                                  th:object="${newComment}" method="post">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control mb-2" th:field="*{author}" 
+                                               placeholder="이름" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="tel" class="form-control mb-2" th:field="*{phoneNumber}" 
+                                               placeholder="연락처 (예: 010-1234-5678)" required>
+                                    </div>
+                                </div>
+                                <textarea class="form-control mb-2" th:field="*{content}" rows="3" 
+                                          placeholder="참여 의사나 문의사항을 적어주세요" required></textarea>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-paper-plane me-1"></i>참여 신청
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div th:if="${runningMate.fullyBooked}" class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            모집 인원이 마감되었습니다.
+                        </div>
+
+                        <!-- Comments List -->
+                        <div th:if="${comments.empty}" class="text-center py-4">
+                            <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">아직 참여 신청이 없습니다.</p>
+                        </div>
+
+                        <div th:unless="${comments.empty}">
+                            <div th:each="comment, iterStat : ${comments}" class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <strong th:text="${comment.author}"></strong>
+                                            <span class="badge bg-success ms-2" th:text="'참여자 ' + (${iterStat.count})"></span>
+                                            <small class="text-muted ms-2" th:text="${#temporals.format(comment.createdAt, 'yyyy.MM.dd HH:mm')}"></small>
+                                        </div>
+                                        <p class="mb-1" th:text="${comment.content}"></p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-phone me-1"></i><span th:text="${comment.phoneNumber}"></span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-compass me-2"></i>Navigation
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/community/running-mates" class="btn btn-outline-success">
+                                <i class="fas fa-list me-1"></i>러닝메이트 목록
+                            </a>
+                            <a href="/community/running-mates/write" class="btn btn-success">
+                                <i class="fas fa-plus me-1"></i>새 모집글 작성
+                            </a>
+                            <a href="/community" class="btn btn-outline-primary">
+                                <i class="fas fa-home me-1"></i>커뮤니티 홈
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>안내사항
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                참여 신청 시 연락처를 정확히 입력해주세요
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                러닝 당일 날씨를 확인해주세요
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                안전장비 착용을 권장합니다
+                            </li>
+                            <li>
+                                <i class="fas fa-check text-success me-2"></i>
+                                러닝 매너를 지켜주세요
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2024 러너스 커뮤니티. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="mb-0">함께 달리며 성장하는 커뮤니티</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

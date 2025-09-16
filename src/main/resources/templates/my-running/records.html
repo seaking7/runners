@@ -189,6 +189,10 @@
                                             <i class="fas fa-shipping-fast me-1"></i>
                                             <span th:text="${record.maxSpeedKmh} + 'km/h'">15.0km/h</span>
                                         </span>
+                                        <span class="stat-badge me-2 mb-1 bg-warning text-dark">
+                                            <i class="fas fa-fire me-1"></i>
+                                            <span th:text="${record.formattedCalories}">250 cal</span>
+                                        </span>
                                     </div>
                                     <div class="record-meta mt-2">
                                         <i class="fas fa-calendar me-1"></i>

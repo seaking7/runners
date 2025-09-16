@@ -31,7 +31,7 @@ class PostServiceTest {
     private Post testPost;
 
     @BeforeEach
-    void setUp() {
+    void 테스트_설정() {
         testPost = new Post();
         testPost.setId(1L);
         testPost.setTitle("테스트 제목");
@@ -44,7 +44,7 @@ class PostServiceTest {
     }
 
     @Test
-    void savePost_ShouldReturnSavedPost() {
+    void 게시물_저장시_저장된_게시물_반환() {
         when(postRepository.save(any(Post.class))).thenReturn(testPost);
 
         Post result = postService.savePost(testPost);
@@ -57,7 +57,7 @@ class PostServiceTest {
     }
 
     @Test
-    void getAllPosts_ShouldReturnListOfPosts() {
+    void 모든_게시물_조회시_게시물_목록_반환() {
         List<Post> posts = Arrays.asList(testPost);
         when(postRepository.findAllOrderByCreatedAtDesc()).thenReturn(posts);
 
@@ -70,7 +70,7 @@ class PostServiceTest {
     }
 
     @Test
-    void getPostById_WhenPostExists_ShouldReturnPost() {
+    void 존재하는_게시물_ID로_조회시_게시물_반환() {
         when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));
 
         Optional<Post> result = postService.getPostById(1L);
@@ -81,7 +81,7 @@ class PostServiceTest {
     }
 
     @Test
-    void getPostById_WhenPostNotExists_ShouldReturnEmpty() {
+    void 존재하지않는_게시물_ID로_조회시_빈값_반환() {
         when(postRepository.findById(1L)).thenReturn(Optional.empty());
 
         Optional<Post> result = postService.getPostById(1L);
@@ -91,7 +91,7 @@ class PostServiceTest {
     }
 
     @Test
-    void getPostByIdAndIncrementView_WhenPostExists_ShouldIncrementViewAndReturnPost() {
+    void 존재하는_게시물_조회수_증가_조회시_조회수_증가하고_게시물_반환() {
         Post updatedPost = new Post();
         updatedPost.setId(1L);
         updatedPost.setTitle("테스트 제목");
@@ -113,7 +113,7 @@ class PostServiceTest {
     }
 
     @Test
-    void getPostByIdAndIncrementView_WhenPostNotExists_ShouldReturnEmpty() {
+    void 존재하지않는_게시물_조회수_증가_조회시_빈값_반환() {
         when(postRepository.findById(1L)).thenReturn(Optional.empty());
 
         Optional<Post> result = postService.getPostByIdAndIncrementView(1L);
@@ -124,7 +124,7 @@ class PostServiceTest {
     }
 
     @Test
-    void searchByTitle_ShouldReturnMatchingPosts() {
+    void 제목으로_검색시_일치하는_게시물들_반환() {
         List<Post> posts = Arrays.asList(testPost);
         when(postRepository.findByTitleContainingIgnoreCaseOrderByCreatedAtDesc("테스트")).thenReturn(posts);
 
@@ -137,7 +137,7 @@ class PostServiceTest {
     }
 
     @Test
-    void searchByAuthor_ShouldReturnMatchingPosts() {
+    void 작성자로_검색시_일치하는_게시물들_반환() {
         List<Post> posts = Arrays.asList(testPost);
         when(postRepository.findByAuthorContainingIgnoreCaseOrderByCreatedAtDesc("작성자")).thenReturn(posts);
 
@@ -150,7 +150,7 @@ class PostServiceTest {
     }
 
     @Test
-    void searchByTitleOrContent_ShouldReturnMatchingPosts() {
+    void 제목_또는_내용으로_검색시_일치하는_게시물들_반환() {
         List<Post> posts = Arrays.asList(testPost);
         when(postRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCaseOrderByCreatedAtDesc("키워드", "키워드"))
             .thenReturn(posts);
@@ -165,7 +165,7 @@ class PostServiceTest {
     }
 
     @Test
-    void deletePost_ShouldCallRepositoryDelete() {
+    void 게시물_삭제시_리포지토리_삭제_호출() {
         doNothing().when(postRepository).deleteById(1L);
 
         postService.deletePost(1L);
@@ -174,7 +174,7 @@ class PostServiceTest {
     }
 
     @Test
-    void updatePost_ShouldReturnUpdatedPost() {
+    void 게시물_수정시_수정된_게시물_반환() {
         Post updatedPost = new Post();
         updatedPost.setId(1L);
         updatedPost.setTitle("수정된 제목");

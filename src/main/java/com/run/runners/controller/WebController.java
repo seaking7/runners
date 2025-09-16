@@ -6,6 +6,7 @@ import com.run.runners.entity.Comment;
 import com.run.runners.entity.Tips;
 import com.run.runners.entity.Review;
 import com.run.runners.entity.RunningRecord;
+import com.run.runners.entity.RunningStatistics;
 import com.run.runners.service.CompetitionService;
 import com.run.runners.service.PostService;
 import com.run.runners.service.CommentService;
@@ -13,6 +14,7 @@ import com.run.runners.service.LikeService;
 import com.run.runners.service.TipsService;
 import com.run.runners.service.ReviewService;
 import com.run.runners.service.RunningRecordService;
+import com.run.runners.service.RunningStatisticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,6 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -34,6 +37,7 @@ public class WebController {
     private final TipsService tipsService;
     private final ReviewService reviewService;
     private final RunningRecordService runningRecordService;
+    private final RunningStatisticsService runningStatisticsService;
 
     @GetMapping("/")
     public String home() {
@@ -134,6 +138,45 @@ public class WebController {
             redirectAttributes.addFlashAttribute("errorMessage", "달리기 기록 삭제 중 오류가 발생했습니다.");
         }
         return "redirect:/my-running/records";
+    }
+    
+    @GetMapping("/my-running/statistics")
+    public String runningStatistics(@RequestParam(required = false) String runnerName, Model model) {
+        List<String> allRunnerNames = runningStatisticsService.getAllRunnerNames();
+        
+        if (runnerName == null || runnerName.trim().isEmpty()) {
+            if (!allRunnerNames.isEmpty()) {
+                runnerName = allRunnerNames.get(0);
+            }
+        }
+        
+        if (runnerName != null && !runnerName.trim().isEmpty()) {
+            List<RunningStatistics> weeklyStats = runningStatisticsService
+                .getStatisticsByRunnerAndPeriod(runnerName, RunningStatistics.StatisticsPeriod.WEEKLY);
+            List<RunningStatistics> monthlyStats = runningStatisticsService
+                .getStatisticsByRunnerAndPeriod(runnerName, RunningStatistics.StatisticsPeriod.MONTHLY);
+            List<RunningStatistics> yearlyStats = runningStatisticsService
+                .getStatisticsByRunnerAndPeriod(runnerName, RunningStatistics.StatisticsPeriod.YEARLY);
+            
+            model.addAttribute("weeklyStats", weeklyStats.subList(0, Math.min(12, weeklyStats.size())));
+            model.addAttribute("monthlyStats", monthlyStats.subList(0, Math.min(12, monthlyStats.size())));
+            model.addAttribute("yearlyStats", yearlyStats);
+            model.addAttribute("selectedRunner", runnerName);
+        }
+        
+        model.addAttribute("allRunnerNames", allRunnerNames);
+        return "my-running/statistics";
+    }
+    
+    @PostMapping("/my-running/statistics/generate")
+    public String generateStatistics(RedirectAttributes redirectAttributes) {
+        try {
+            runningStatisticsService.generateImmediateStatistics();
+            redirectAttributes.addFlashAttribute("successMessage", "통계가 성공적으로 생성되었습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "통계 생성 중 오류가 발생했습니다.");
+        }
+        return "redirect:/my-running/statistics";
     }
 
     @GetMapping("/community")

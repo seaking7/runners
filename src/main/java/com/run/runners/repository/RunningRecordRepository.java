@@ -31,4 +31,16 @@ public interface RunningRecordRepository extends JpaRepository<RunningRecord, Lo
     
     @Query("SELECT SUM(r.runTimeMinutes) FROM RunningRecord r WHERE r.runnerName = :runnerName")
     Integer getTotalRunTimeByRunnerName(@Param("runnerName") String runnerName);
+    
+    @Query("SELECT DISTINCT r.runnerName FROM RunningRecord r ORDER BY r.runnerName")
+    List<String> findDistinctRunnerNames();
+    
+    @Query("SELECT r FROM RunningRecord r WHERE r.runnerName = :runnerName AND YEAR(r.recordDate) = :year AND WEEK(r.recordDate) = :week ORDER BY r.recordDate DESC")
+    List<RunningRecord> findByRunnerNameAndWeek(@Param("runnerName") String runnerName, @Param("year") Integer year, @Param("week") Integer week);
+    
+    @Query("SELECT r FROM RunningRecord r WHERE r.runnerName = :runnerName AND YEAR(r.recordDate) = :year AND MONTH(r.recordDate) = :month ORDER BY r.recordDate DESC")
+    List<RunningRecord> findByRunnerNameAndMonth(@Param("runnerName") String runnerName, @Param("year") Integer year, @Param("month") Integer month);
+    
+    @Query("SELECT r FROM RunningRecord r WHERE r.runnerName = :runnerName AND YEAR(r.recordDate) = :year ORDER BY r.recordDate DESC")
+    List<RunningRecord> findByRunnerNameAndYear(@Param("runnerName") String runnerName, @Param("year") Integer year);
 }

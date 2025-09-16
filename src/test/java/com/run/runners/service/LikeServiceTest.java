@@ -35,7 +35,7 @@ class LikeServiceTest {
     private String userIdentifier;
 
     @BeforeEach
-    void setUp() {
+    void 테스트_설정() {
         testPost = new Post();
         testPost.setId(1L);
         testPost.setTitle("테스트 제목");
@@ -56,7 +56,7 @@ class LikeServiceTest {
     }
 
     @Test
-    void toggleLike_WhenPostNotExists_ShouldThrowException() {
+    void 존재하지않는_게시물에_좋아요_토글시_예외발생() {
         when(postRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () -> {
@@ -68,7 +68,7 @@ class LikeServiceTest {
     }
 
     @Test
-    void toggleLike_WhenLikeNotExists_ShouldAddLike() {
+    void 좋아요가_없을때_토글하면_좋아요_추가() {
         when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));
         when(likeRepository.existsByPostAndUserIdentifier(testPost, userIdentifier)).thenReturn(false);
         when(likeRepository.save(any(Like.class))).thenReturn(testLike);
@@ -84,7 +84,7 @@ class LikeServiceTest {
     }
 
     @Test
-    void toggleLike_WhenLikeExists_ShouldRemoveLike() {
+    void 좋아요가_있을때_토글하면_좋아요_제거() {
         testPost.setLikeCount(1);
         when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));
         when(likeRepository.existsByPostAndUserIdentifier(testPost, userIdentifier)).thenReturn(true);
@@ -100,7 +100,7 @@ class LikeServiceTest {
     }
 
     @Test
-    void isLikedByUser_WhenPostNotExists_ShouldReturnFalse() {
+    void 존재하지않는_게시물의_좋아요_확인시_false_반환() {
         when(postRepository.findById(1L)).thenReturn(Optional.empty());
 
         boolean result = likeService.isLikedByUser(1L, userIdentifier);
@@ -111,7 +111,7 @@ class LikeServiceTest {
     }
 
     @Test
-    void isLikedByUser_WhenPostExistsAndLiked_ShouldReturnTrue() {
+    void 좋아요한_게시물의_좋아요_확인시_true_반환() {
         when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));
         when(likeRepository.existsByPostAndUserIdentifier(testPost, userIdentifier)).thenReturn(true);
 
@@ -123,7 +123,7 @@ class LikeServiceTest {
     }
 
     @Test
-    void isLikedByUser_WhenPostExistsAndNotLiked_ShouldReturnFalse() {
+    void 좋아요하지않은_게시물의_좋아요_확인시_false_반환() {
         when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));
         when(likeRepository.existsByPostAndUserIdentifier(testPost, userIdentifier)).thenReturn(false);
 
@@ -135,7 +135,7 @@ class LikeServiceTest {
     }
 
     @Test
-    void getLikeCount_ShouldReturnCorrectCount() {
+    void 좋아요_개수_조회시_정확한_개수_반환() {
         when(likeRepository.countByPostId(1L)).thenReturn(5L);
 
         long result = likeService.getLikeCount(1L);
@@ -145,7 +145,7 @@ class LikeServiceTest {
     }
 
     @Test
-    void getLikeCount_WhenNoLikes_ShouldReturnZero() {
+    void 좋아요가_없을때_개수_조회시_0_반환() {
         when(likeRepository.countByPostId(1L)).thenReturn(0L);
 
         long result = likeService.getLikeCount(1L);

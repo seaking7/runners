@@ -5,12 +5,14 @@ import com.run.runners.entity.Post;
 import com.run.runners.entity.Comment;
 import com.run.runners.entity.Tips;
 import com.run.runners.entity.Review;
+import com.run.runners.entity.RunningRecord;
 import com.run.runners.service.CompetitionService;
 import com.run.runners.service.PostService;
 import com.run.runners.service.CommentService;
 import com.run.runners.service.LikeService;
 import com.run.runners.service.TipsService;
 import com.run.runners.service.ReviewService;
+import com.run.runners.service.RunningRecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,6 +33,7 @@ public class WebController {
     private final LikeService likeService;
     private final TipsService tipsService;
     private final ReviewService reviewService;
+    private final RunningRecordService runningRecordService;
 
     @GetMapping("/")
     public String home() {
@@ -74,6 +77,63 @@ public class WebController {
     @GetMapping("/my-running")
     public String myRunning() {
         return "my-running";
+    }
+    
+    @GetMapping("/my-running/records")
+    public String runningRecords(Model model) {
+        model.addAttribute("runningRecords", runningRecordService.getAllRunningRecords());
+        return "my-running/records";
+    }
+    
+    @GetMapping("/my-running/records/write")
+    public String runningRecordWriteForm(Model model) {
+        model.addAttribute("runningRecord", new RunningRecord());
+        return "my-running/records-write";
+    }
+    
+    @PostMapping("/my-running/records/write")
+    public String runningRecordWrite(@ModelAttribute RunningRecord runningRecord, RedirectAttributes redirectAttributes) {
+        try {
+            runningRecordService.saveRunningRecord(runningRecord);
+            redirectAttributes.addFlashAttribute("successMessage", "달리기 기록이 성공적으로 등록되었습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "달리기 기록 등록 중 오류가 발생했습니다.");
+        }
+        return "redirect:/my-running/records";
+    }
+    
+    @GetMapping("/my-running/records/{id}")
+    public String runningRecordDetail(@PathVariable Long id, Model model) {
+        Optional<RunningRecord> runningRecord = runningRecordService.getRunningRecordById(id);
+        if (runningRecord.isPresent()) {
+            model.addAttribute("runningRecord", runningRecord.get());
+            return "my-running/records-detail";
+        } else {
+            return "redirect:/my-running/records";
+        }
+    }
+    
+    @GetMapping("/my-running/records/search")
+    public String runningRecordSearch(@RequestParam(required = false) String keyword,
+                                    Model model) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            model.addAttribute("runningRecords", runningRecordService.searchByRunnerName(keyword));
+            model.addAttribute("keyword", keyword);
+        } else {
+            model.addAttribute("runningRecords", runningRecordService.getAllRunningRecords());
+        }
+        return "my-running/records";
+    }
+    
+    @PostMapping("/my-running/records/{id}/delete")
+    public String deleteRunningRecord(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            runningRecordService.deleteRunningRecord(id);
+            redirectAttributes.addFlashAttribute("successMessage", "달리기 기록이 삭제되었습니다.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "달리기 기록 삭제 중 오류가 발생했습니다.");
+        }
+        return "redirect:/my-running/records";
     }
 
     @GetMapping("/community")
